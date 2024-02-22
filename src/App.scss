@@ -1,0 +1,40 @@
+.app {
+    width: 100%;
+    height: 100vh;
+
+    .indicators {
+        width: 100%;
+        height: 100%;
+        flex-wrap: wrap;
+        z-index: 0;
+
+        .indicator {
+            position: relative;
+            top: 0px;
+            width: 50%;
+            //animation-name: indicatorMove;
+            animation-iteration-count: infinite;
+        }
+
+        .indicator0,
+        .indicator1 {
+            animation-duration: 0s;
+        }
+
+        .indicator2,
+        .indicator3 {
+            animation-duration: 2s;
+        }
+
+        .indicator4,
+        .indicator5 {
+            animation-duration: 3s;
+        }
+    }
+}
+
+@keyframes indicatorMove {
+    to {
+        top: 500px;
+    }
+}
