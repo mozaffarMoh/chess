@@ -23,29 +23,39 @@
         height: 140px;
     }
 
-    .stop-game-message{
+    .stop-game-message {
         position: absolute;
-        top : 30%;
+        top: 30%;
         left: 35%;
-        width : 30%;
+        width: 30%;
         height: 300px;
         border-radius: 20px;
         background-color: #000000ED;
-        color : white;
+        color: white;
         z-index: 40;
-        button{
-            width : 50%;
+        text-align: center;
+
+        button {
+            width: 50%;
             height: 50px;
             font-size: 20px;
             border-radius: 10px;
-            margin-top : 20px;
+            margin-top: 20px;
             cursor: pointer;
-            &:hover{
+
+            &:hover {
                 background-color: rgb(216, 211, 211);
             }
         }
     }
 
+    .score-number {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        color: rgb(83, 248, 61);
+        z-index: 100;
+    }
 }
 
 
@@ -69,6 +79,11 @@
         .car2 {
             width: 60px;
             height: 110px;
+        }
+
+        .stop-game-message {
+            left: 50px;
+            width: 80%;
         }
     }
 }

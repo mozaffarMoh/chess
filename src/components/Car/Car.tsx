@@ -7,14 +7,35 @@ import car4 from "../../assets/Images/car4.png";
 import { useSpring, animated } from "@react-spring/web";
 import React from "react";
 
-const Car = () => {
+const Car = ({ setCounterProp, setStopGameProp }: any) => {
   const calcRandom = () => {
     return Math.random() * window.innerWidth - 50;
   };
+  const [carPositions, setCarPositions] = React.useState([]);
   const otherCarsRefs: any = React.useRef([]);
   const [myCarPosition, setMyCarPosition]: any = React.useState(50);
   const [randomValue, setRandomValue]: any = React.useState();
   const [stopGame, setStopGame]: any = React.useState(false);
+  const [counter, setCounter]: any = React.useState(0);
+
+  /* Increase counter */
+  React.useEffect(() => {
+    if (!stopGame) {
+      setTimeout(() => {
+        setInterval(
+          setCounter((prev: any) => prev + 1),
+          1000
+        );
+        setCounterProp(counter);
+        if (counter === 29) {
+          setStopGame(true);
+          setStopGameProp(true);
+        }
+      }, 1000);
+    } else {
+      clearInterval(0);
+    }
+  }, [counter]);
 
   const carsArray = [
     { image: car1, className: "other-car car1" },
@@ -23,9 +44,19 @@ const Car = () => {
     { image: car4, className: "other-car car4" },
   ];
 
+  /* Handle Speed based on counter */
+  const handleSpeed = () => {
+    if (counter < 10) {
+      return 2000;
+    } else if (counter >= 10 && counter < 20) {
+      return 1000;
+    } else {
+      return 500;
+    }
+  };
   /* Animations for Other Cars */
   const otherCarsStyles: any = carsArray.map((_, index) => {
-    let speed = index * 100 + 2000;
+    let speed = index * 100 + handleSpeed();
 
     return useSpring({
       from: {
@@ -44,53 +75,55 @@ const Car = () => {
 
   /* Change position of myCar by arrows */
   React.useEffect(() => {
-    document.addEventListener("keydown", function (event) {
-      if (event.key === "ArrowRight") {
-        setMyCarPosition((prev: any) => prev + 10);
-      } else if (event.key === "ArrowLeft") {
-        setMyCarPosition((prev: any) => prev - 10);
-      }
-    });
-  }, []);
-
-  /* Check cars collision */
-  const positionX0 = otherCarsRefs?.current[0]?.style.left;
-  //const positionX1 = otherCarsRefs?.current[1]?.style.left;
-  //const positionX2 = otherCarsRefs?.current[2]?.style.left;
-  //const positionX3 = otherCarsRefs?.current[3]?.style.left;
-  const positionX0Number = Number(positionX0?.slice(0, positionX0.length - 2));
-  //const positionX1Number = Number(positionX1?.slice(0, positionX1.length - 2));
-  //const positionX2Number = Number(positionX2?.slice(0, positionX2.length - 2));
-  //const positionX3Number = Number(positionX3?.slice(0, positionX3.length - 2));
-  ///////////////////////////////
-  const positionY0 = otherCarsRefs.current[0]?.style?.top;
-  //const positionY1 = otherCarsRefs.current[1]?.style?.top;
-  //const positionY2 = otherCarsRefs.current[2]?.style?.top;
-  //const positionY3 = otherCarsRefs.current[3]?.style?.top;
-  const positionY0Number = Number(positionY0?.slice(0, positionY0.length - 2));
-  //const positionY1Number = Number(positionY1?.slice(0, positionY1.length - 2));
-  //const positionY2Number = Number(positionY2?.slice(0, positionY2.length - 2));
-  //const positionY3Number = Number(positionY3?.slice(0, positionY3.length - 2));
-
-  React.useEffect(() => {
-    // console.log(positionY0Number ,' | ', myCarPosition)
-    if (positionY0Number > 390 && positionY0Number < 410) {
-      console.log("AAAAAAAAAAA");
-      if (
-        positionX0Number >= myCarPosition - 50 &&
-        positionX0Number <= myCarPosition + 50
-      ) {
-        setStopGame(true);
-        console.log("FINALFINALFINALFINAL");
+    function handleKeyDown(event: KeyboardEvent) {
+      if (!stopGame) {
+        if (event.key === "ArrowRight") {
+          setMyCarPosition((prev: any) => prev + 10);
+        } else if (event.key === "ArrowLeft") {
+          setMyCarPosition((prev: any) => prev - 10);
+        }
       }
     }
-  }, []);
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [stopGame]);
+
+  /* store positions in a states */
+  React.useEffect(() => {
+    const positions = otherCarsRefs.current.map((ref: any) => {
+      const style = ref.style;
+      return {
+        x: Number(style.left.slice(0, -2)),
+        y: Number(style.top.slice(0, -2)),
+      };
+    });
+    setCarPositions(positions);
+  }, [otherCarsRefs, myCarPosition]);
+
+  /* Check cars collision */
+  React.useEffect(() => {
+    const isCollision = carPositions.some((car: any) => {
+      return (
+        car.y > 400 && car.y < 600 && Math.abs(car.x - myCarPosition) <= 80
+      );
+    });
+
+    if (isCollision) {
+      setStopGame(true);
+      setStopGameProp(true);
+    }
+  }, [otherCarsRefs.current?.style?.top, carPositions, myCarPosition]);
 
   return (
     <div className="car">
       {stopGame && (
         <div className="stop-game-message flexCenterColumn">
-          <h1>Game Over</h1>
+          {counter === 30 ? <h1>Congratulations :)</h1> : <h1>Game Over</h1>}
+          <h1>Your score is : {counter}</h1>
           <button onClick={() => window.location.reload()}>Try again</button>
         </div>
       )}
@@ -99,6 +132,7 @@ const Car = () => {
         className="myCar"
         style={{ left: `${myCarPosition}px` }}
       />
+      <h1 className="score-number">your score : {counter}</h1>
       <div className="other-cars">
         {carsArray.map((item, index) => {
           return (
