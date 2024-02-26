@@ -49,12 +49,18 @@
         }
     }
 
-    .score-number {
+    .current-score,
+    .top-score {
         position: absolute;
-        top: 10px;
+        top: 50px;
         right: 10px;
-        color: rgb(83, 248, 61);
+        color: rgb(104, 255, 84);
         z-index: 100;
+    }
+
+    .top-score {
+        top: 10px;
+        color: rgb(177, 219, 172);
     }
 }
 

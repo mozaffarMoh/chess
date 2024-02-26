@@ -11,6 +11,7 @@ const Car = ({ setCounterProp, setStopGameProp }: any) => {
   const calcRandom = () => {
     return Math.random() * window.innerWidth - 50;
   };
+  const topScore = localStorage.getItem("topScore");
   const [carPositions, setCarPositions] = React.useState([]);
   const otherCarsRefs: any = React.useRef([]);
   const [myCarPosition, setMyCarPosition]: any = React.useState(50);
@@ -115,6 +116,13 @@ const Car = ({ setCounterProp, setStopGameProp }: any) => {
     if (isCollision) {
       setStopGame(true);
       setStopGameProp(true);
+      if (!topScore) {
+        localStorage.setItem("topScore", counter);
+      } else {
+        if (counter > topScore) {
+          localStorage.setItem("topScore", counter);
+        }
+      }
     }
   }, [otherCarsRefs.current?.style?.top, carPositions, myCarPosition]);
 
@@ -132,7 +140,8 @@ const Car = ({ setCounterProp, setStopGameProp }: any) => {
         className="myCar"
         style={{ left: `${myCarPosition}px` }}
       />
-      <h1 className="score-number">your score : {counter}</h1>
+      <h1 className="top-score">last score is : {topScore ? topScore : 0}</h1>
+      <h1 className="current-score">current score : {counter}</h1>
       <div className="other-cars">
         {carsArray.map((item, index) => {
           return (
