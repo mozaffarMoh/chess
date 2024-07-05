@@ -1,7 +1,8 @@
 import { initialPositions } from "./initialPositions";
 
 export const labelsColumnArray = ["a", "b", "c", "d", "e", "f", "g", "h"];
-export const labelsRowArray = ["1", "2", "3", "4", "5", "6", "7", "8"];
+export const labelsRowArray = ["8", "7", "6", "5", "4", "3", "2", "1"];
+
 export const generateSquares = () => {
     const squares = [];
     const labels = ["a", "b", "c", "d", "e", "f", "g", "h"];
@@ -11,7 +12,7 @@ export const generateSquares = () => {
             const isEvenSquare = (row + col) % 2 === 0;
             squares.push({
                 label,
-                colorGrade: isEvenSquare ? "100" : "500",
+                colorGrade: isEvenSquare ? "bg-slate-300" : "bg-slate-600",
                 piece: initialPositions[label] || null,
             });
         }
