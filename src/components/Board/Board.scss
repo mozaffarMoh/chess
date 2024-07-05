@@ -1,0 +1,28 @@
+.board {
+    width: 700px;
+    background-color: #504f4f;
+    flex-wrap: wrap;
+
+    .square {
+        width: 87px;
+        height: 65px;
+        border: 1px solid #081011;
+        cursor: pointer;
+        transition: all .5s ease;
+
+        &:hover {
+            background-color: #c4cf2a;
+        }
+    }
+}
+
+
+@media (max-width : 800px) {
+    .board {
+        width: 350px;
+
+        .square {
+            width: 43px;
+        }
+    }
+}
