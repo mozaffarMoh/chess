@@ -7,3 +7,10 @@
         padding : 10px;
     }
 }
+
+
+@media (max-width : 800px) {
+    .labels-row-container {
+        height: 100%;
+    }
+}
