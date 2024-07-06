@@ -10,10 +10,11 @@ export const generateSquares = () => {
         for (let col = 0; col < 8; col++) {
             const label = `${labels[col]}${row}`;
             const isEvenSquare = (row + col) % 2 === 0;
+            const pieceColor = label.includes("1") || label.includes("2") ? 'white' : label.includes("7") || label.includes("8") ? "black" : ""
             squares.push({
                 label,
-                colorGrade: isEvenSquare ? "bg-slate-300" : "bg-slate-600",
-                piece: initialPositions[label] || null,
+                color: isEvenSquare ? "bg-slate-300" : "bg-slate-600",
+                piece: { name: initialPositions[label] || null, color: pieceColor },
             });
         }
     }

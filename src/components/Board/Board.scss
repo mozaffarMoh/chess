@@ -11,8 +11,12 @@
         transition: all .5s ease;
 
         &:hover {
-            background-color: #c4cf2a;
+            background-color: #b4aeae;
         }
+    }
+
+    .selected-square-bg {
+        background-color: #8d8f1b !important;
     }
 }
 

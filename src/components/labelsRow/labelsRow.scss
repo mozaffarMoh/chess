@@ -12,5 +12,9 @@
 @media (max-width : 800px) {
     .labels-row-container {
         height: 100%;
+
+        .label-row{
+            padding: 8px 10px;
+        }
     }
 }
