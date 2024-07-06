@@ -15,7 +15,7 @@ export const generateSquares = () => {
                 label,
                 color: isEvenSquare ? "bg-slate-300" : "bg-slate-600",
                 piece: { name: initialPositions[label] || null, color: pieceColor },
-            });
+            })
         }
     }
     return squares;
