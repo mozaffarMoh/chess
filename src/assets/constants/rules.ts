@@ -57,7 +57,7 @@ export function checkRules(prevSquare: any, currentSquare: any, squares: any) {
 
     /* Rook rule */
     function rookRule() {
-        let range = [];
+        let range: any = [];
         for (let i = minValue + 1; i < maxValue; i++) {
             prevNumber == currentNumber && range.push(i);
             if (prevLetter == currentLetter) {
@@ -69,7 +69,7 @@ export function checkRules(prevSquare: any, currentSquare: any, squares: any) {
 
         const isRoadClosing = () => {
             let result = true
-            range.forEach((item) => {
+            range.forEach((item: any) => {
                 if (squares[item]?.piece.name != null) {
                     result = false
                 }
