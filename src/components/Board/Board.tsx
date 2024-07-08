@@ -25,7 +25,7 @@ const Board = () => {
     }
 
     if (prevSquare && playerTurn !== square.piece.color) {
-      let checkValue: any = checkRules(prevSquare, square);
+      let checkValue: any = checkRules(prevSquare, square, squares);
 
       if (checkValue.result) {
         setCurrentSquare(square);
