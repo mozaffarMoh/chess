@@ -1,5 +1,5 @@
 
-export function checkRules(prevSquare: any, currentSquare: any, squares: any) {
+export function checkRules(prevSquare: any, currentSquare: any, squares: any, isWhiteCastling: boolean, isBlackCastling: boolean) {
     const pieceName = prevSquare.piece.name;
     const playerColor = prevSquare.piece.color;
     const opponentPiece = currentSquare.piece.name;
@@ -47,8 +47,12 @@ export function checkRules(prevSquare: any, currentSquare: any, squares: any) {
         const whiteState = playerColor == "white" && (whiteFirstMove || whiteWalk || whiteEat);
         const blackState = playerColor == "black" && (blackFirstMove || blackWalk || blackEat);
 
+        const checkMate = () => {
+            return opponentPiece == 'king' ? true : false
+        }
         if (whiteState || blackState) {
-            return { result: true, message: isPromote }
+            let message = checkMate() ? 'checkMate' : isPromote
+            return { result: true, message: message }
         }
 
         return false
@@ -84,8 +88,14 @@ export function checkRules(prevSquare: any, currentSquare: any, squares: any) {
         const whiteState = playerColor == "white" && (checkRoad && checkWhiteTarget);
         const blackState = playerColor == "black" && (checkRoad && checkBlackTarget)
 
+
+        const checkMate = () => {
+            return opponentPiece == 'king' ? true : false
+        }
         if (whiteState || blackState) {
-            return { result: true, message: null }
+            let message = checkMate() ? 'checkMate' : null
+
+            return { result: true, message: message }
         }
 
         return false
@@ -140,8 +150,15 @@ export function checkRules(prevSquare: any, currentSquare: any, squares: any) {
             return result
         }
 
+
+        const checkMate = () => {
+            return opponentPiece == 'king' ? true : false
+        }
+
+
         if (checkRoad()) {
-            return { result: true, message: null }
+            let message = checkMate() ? 'checkMate' : null
+            return { result: true, message: message }
         }
 
         return false
@@ -150,6 +167,11 @@ export function checkRules(prevSquare: any, currentSquare: any, squares: any) {
 
     /* Knight rule */
     function knightRule() {
+
+        const checkMate = () => {
+            return opponentPiece == 'king' ? true : false
+        }
+
         const checkNumberByOne = prevNumber == currentNumber + 1 || prevNumber == currentNumber - 1;
         const checkNumberByTwo = prevNumber == currentNumber + 2 || prevNumber == currentNumber - 2;
         if (
@@ -158,7 +180,8 @@ export function checkRules(prevSquare: any, currentSquare: any, squares: any) {
             (prevLetter == currentLetter - 2 && checkNumberByOne) ||
             (prevLetter == currentLetter - 1 && checkNumberByTwo)
         ) {
-            return { result: true, message: null }
+            let message = checkMate() ? 'checkMate' : null
+            return { result: true, message: message }
         }
 
         return false
@@ -167,6 +190,7 @@ export function checkRules(prevSquare: any, currentSquare: any, squares: any) {
 
     /* King rule */
     function kingRule() {
+        let castlingMessage: any = null
         const blockedPoints = [-9, -8, -7, -1, 1, 7, 8, 9]
         const checkNumber = prevNumber == currentNumber + 1 || prevNumber == currentNumber - 1 || prevNumber == currentNumber;
         const checkLetter = prevLetter == currentLetter + 1 || prevLetter == currentLetter - 1 || prevLetter == currentLetter;
@@ -174,8 +198,8 @@ export function checkRules(prevSquare: any, currentSquare: any, squares: any) {
         const isOppenentKingExist = () => {
             let result = true
             blockedPoints.forEach((item) => {
-                let isBlackKing = playerColor == 'black' && squares[currentIndex + item].piece.color !== 'black';
-                let isWhiteKing = playerColor == 'white' && squares[currentIndex + item].piece.color !== 'white';
+                let isBlackKing = playerColor == 'black' && squares[currentIndex + item]?.piece.color !== 'black';
+                let isWhiteKing = playerColor == 'white' && squares[currentIndex + item]?.piece.color !== 'white';
                 if (squares[currentIndex + item] &&
                     squares[currentIndex + item].piece.name == 'king' &&
                     (isWhiteKing || isBlackKing)
@@ -187,12 +211,35 @@ export function checkRules(prevSquare: any, currentSquare: any, squares: any) {
             return result;
         }
 
-        if (checkLetter && checkNumber && isOppenentKingExist()) {
-            return { result: true, message: null }
+        const checkCastling = () => {
+
+            const startCastling = (removeIndex: number, newIndex: number, color: string) => {
+                squares[removeIndex].piece = { name: null, color: "" }
+                squares[newIndex].piece = { name: 'rook', color: color }
+                if (color == "white") { castlingMessage = 'whiteIsCatling'; }
+                if (color == "black") { castlingMessage = 'blackIsCatling'; }
+
+                return true
+            }
+
+            const checkRightCastlingOnWhite = playerColor == "white" && prevLabel == 'e1' && currentLabel == 'g1' && squares[63]?.piece?.name == 'rook' && squares[63]?.piece?.color == 'white';
+            const checkLeftCastlingOnWhite = playerColor == "white" && prevLabel == 'e1' && currentLabel == 'c1' && squares[56]?.piece?.name == 'rook' && squares[56]?.piece?.color == 'white';
+            const checkLeftCastlingOnBlack = playerColor == "black" && prevLabel == 'e8' && currentLabel == 'g8' && squares[7]?.piece?.name == 'rook' && squares[7]?.piece?.color == 'black';
+            const checkRightCastlingOnBlack = playerColor == "black" && prevLabel == 'e8' && currentLabel == 'c8' && squares[0]?.piece?.name == 'rook' && squares[0]?.piece?.color == 'black';
+
+            if (checkRightCastlingOnWhite && !isWhiteCastling) return startCastling(63, 61, 'white')
+            if (checkLeftCastlingOnWhite && !isWhiteCastling) return startCastling(56, 59, 'white')
+            if (checkLeftCastlingOnBlack && !isBlackCastling) return startCastling(7, 5, 'black')
+            if (checkRightCastlingOnBlack && !isBlackCastling) return startCastling(0, 3, 'black')
+            return false
+        }
+
+
+        if (checkCastling() || (checkLetter && checkNumber && isOppenentKingExist())) {
+            return { result: true, message: castlingMessage }
         }
 
         return false
-
     }
 
 

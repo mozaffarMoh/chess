@@ -6,17 +6,26 @@ import Promote from "../Promote/Promote";
 import { checkRules } from "../../assets/constants/rules";
 import { Howl } from "howler";
 import moveSound from "../../assets/sounds/move.mp3";
+import checkMateSound from "../../assets/sounds/win.mp3";
+import CheckMate from "../CheckMate/CheckMate";
 
 const Board = () => {
   const [squares, setSquares] = useState(generateSquares());
   const [prevSquare, setPrevSquare]: any = useState(null);
   const [currentSquare, setCurrentSquare]: any = useState(null);
   const [playerTurn, setPlayerTurn] = useState("white");
+  const [winner, setWinner] = useState("");
   const [isMoveSuccess, setIsMoveSuccess] = useState(false);
   const [isPromote, setIsPromote] = useState(false);
+  const [isWhiteCastling, setIsWhiteCastling] = useState(false);
+  const [isBlackCastling, setIsBlackCastling] = useState(false);
+  const [isCheckMate, setIsCheckMate] = useState(false);
   const [promotePiece, setPromotePiece] = useState("");
   const moveSoundFile = new Howl({
     src: [moveSound],
+  });
+  const checkMateSoundFile = new Howl({
+    src: [checkMateSound],
   });
 
   const handleSquareClick = (square: any) => {
@@ -25,18 +34,26 @@ const Board = () => {
     }
 
     if (prevSquare && playerTurn !== square.piece.color) {
-      let checkValue: any = checkRules(prevSquare, square, squares);
+      let checkValue: any = checkRules(
+        prevSquare,
+        square,
+        squares,
+        isWhiteCastling,
+        isBlackCastling
+      );
 
       if (checkValue.result) {
         setCurrentSquare(square);
         setIsMoveSuccess(true);
       }
-      if (checkValue.message === "promote") {
-        setIsPromote(true);
-      }
+      checkValue.message === "promote" && setIsPromote(true);
+      checkValue.message === "whiteIsCatling" && setIsWhiteCastling(true);
+      checkValue.message === "blackIsCatling" && setIsBlackCastling(true);
+      checkValue.message === "checkMate" && setIsCheckMate(true);
     }
   };
 
+  /* success move */
   useEffect(() => {
     if (isMoveSuccess && !isPromote) {
       moveSoundFile.play();
@@ -57,8 +74,17 @@ const Board = () => {
     }
   }, [isMoveSuccess, isPromote]);
 
+  /* Check mate */
+  useEffect(() => {
+    if (isCheckMate) {
+      setWinner(playerTurn);
+      checkMateSoundFile.play();
+    }
+  }, [isCheckMate]);
+
   return (
     <div className="board flexCenter">
+      {isCheckMate && <CheckMate player={winner} />}
       {isPromote && (
         <Promote
           setIsPromote={setIsPromote}
