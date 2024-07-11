@@ -1,5 +1,5 @@
 
-export function checkRules(prevSquare: any, currentSquare: any, squares: any, isWhiteCastling: boolean, isBlackCastling: boolean) {
+export function checkRules(prevSquare: any, currentSquare: any, squares: any, setSquares: any, isWhiteCastling: boolean, isBlackCastling: boolean) {
     const pieceName = prevSquare.piece.name;
     const playerColor = prevSquare.piece.color;
     const opponentPiece = currentSquare.piece.name;
@@ -22,13 +22,13 @@ export function checkRules(prevSquare: any, currentSquare: any, squares: any, is
             !opponentPiece &&
             prevNumber == 2 &&
             currentLetter == prevLetter &&
-            (currentNumber == prevNumber + 1 || (currentNumber == prevNumber + 2 && !squares[prevIndex - 8].piece.name))
+            (currentNumber == prevNumber + 1 || (currentNumber == prevNumber + 2 && !squares[prevIndex - 8]?.piece?.name))
 
         const blackFirstMove =
             !opponentPiece &&
             prevNumber == 7 &&
             currentLetter == prevLetter &&
-            (currentNumber == prevNumber - 1 || (currentNumber == prevNumber - 2 && !squares[prevIndex + 8].piece.name))
+            (currentNumber == prevNumber - 1 || (currentNumber == prevNumber - 2 && !squares[prevIndex + 8]?.piece?.name))
 
 
         /* Pawl walk */
@@ -190,7 +190,7 @@ export function checkRules(prevSquare: any, currentSquare: any, squares: any, is
 
     /* King rule */
     function kingRule() {
-        let castlingMessage: any = null
+        let castlingMessage: any = playerColor == "white" ? "whiteKing" : 'blackKing'
         const blockedPoints = [-9, -8, -7, -1, 1, 7, 8, 9]
         const checkNumber = prevNumber == currentNumber + 1 || prevNumber == currentNumber - 1 || prevNumber == currentNumber;
         const checkLetter = prevLetter == currentLetter + 1 || prevLetter == currentLetter - 1 || prevLetter == currentLetter;
@@ -201,7 +201,7 @@ export function checkRules(prevSquare: any, currentSquare: any, squares: any, is
                 let isBlackKing = playerColor == 'black' && squares[currentIndex + item]?.piece.color !== 'black';
                 let isWhiteKing = playerColor == 'white' && squares[currentIndex + item]?.piece.color !== 'white';
                 if (squares[currentIndex + item] &&
-                    squares[currentIndex + item].piece.name == 'king' &&
+                    squares[currentIndex + item]?.piece.name == 'king' &&
                     (isWhiteKing || isBlackKing)
                 ) {
                     result = false
@@ -214,10 +214,23 @@ export function checkRules(prevSquare: any, currentSquare: any, squares: any, is
         const checkCastling = () => {
 
             const startCastling = (removeIndex: number, newIndex: number, color: string) => {
-                squares[removeIndex].piece = { name: null, color: "" }
-                squares[newIndex].piece = { name: 'rook', color: color }
-                if (color == "white") { castlingMessage = 'whiteIsCatling'; }
-                if (color == "black") { castlingMessage = 'blackIsCatling'; }
+                setSquares((prev: any) => {
+                    const newArray = [...prev]
+                    newArray[prevIndex] = {
+                        ...newArray[prevIndex],
+                        piece: { name: null, color: "" },
+                    };
+                    newArray[currentIndex] = {
+                        ...newArray[currentIndex],
+                        piece: { name: 'king', color: color },
+                    };
+                    newArray[removeIndex] = { ...newArray[removeIndex], piece: { name: null, color: "" } }
+                    newArray[newIndex] = { ...newArray[newIndex], piece: { name: 'rook', color: color } }
+                    return newArray
+                });
+
+                if (color == "white") { castlingMessage = 'isCastlingEventWhite'; }
+                if (color == "black") { castlingMessage = 'isCastlingEventBlack'; }
 
                 return true
             }

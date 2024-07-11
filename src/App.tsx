@@ -2,6 +2,7 @@ import "./App.scss";
 import Board from "./components/Board/Board";
 import LabelsColumn from "./components/labelsColumn/labelsColumn";
 import LabelsRow from "./components/labelsRow/labelsRow";
+import ReturnArrows from "./components/ReturnArrows/ReturnArrows";
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
         <LabelsColumn />
         <Board />
         <LabelsColumn />
+        <ReturnArrows />
       </div>
       <LabelsRow />
     </div>

@@ -8,8 +8,16 @@ import { Howl } from "howler";
 import moveSound from "../../assets/sounds/move.mp3";
 import checkMateSound from "../../assets/sounds/win.mp3";
 import CheckMate from "../CheckMate/CheckMate";
-
+import { useDispatch, useSelector } from "react-redux";
+import { RootType } from "../../store";
+import { addMoves, startfromThisPoint } from "../../Slices/MovesSlice";
+import { increaseCount } from "../../Slices/returnMovesCount";
 const Board = () => {
+  const dispatch = useDispatch();
+  const squaresSlice = useSelector((state: RootType) => state.moves.data);
+  const returnMovesCount = useSelector(
+    (state: RootType) => state.returnMovesCount.value
+  );
   const [squares, setSquares] = useState(generateSquares());
   const [prevSquare, setPrevSquare]: any = useState(null);
   const [currentSquare, setCurrentSquare]: any = useState(null);
@@ -19,6 +27,7 @@ const Board = () => {
   const [isPromote, setIsPromote] = useState(false);
   const [isWhiteCastling, setIsWhiteCastling] = useState(false);
   const [isBlackCastling, setIsBlackCastling] = useState(false);
+  const [isCastlingEvent, setIsCastlingEvent] = useState(false);
   const [isCheckMate, setIsCheckMate] = useState(false);
   const [promotePiece, setPromotePiece] = useState("");
   const moveSoundFile = new Howl({
@@ -38,41 +47,98 @@ const Board = () => {
         prevSquare,
         square,
         squares,
+        setSquares,
         isWhiteCastling,
         isBlackCastling
       );
 
       if (checkValue.result) {
+        dispatch(startfromThisPoint(returnMovesCount));
         setCurrentSquare(square);
         setIsMoveSuccess(true);
       }
+
       checkValue.message === "promote" && setIsPromote(true);
-      checkValue.message === "whiteIsCatling" && setIsWhiteCastling(true);
-      checkValue.message === "blackIsCatling" && setIsBlackCastling(true);
+      (checkValue.message === "whiteKing" ||
+        checkValue.message === "isCastlingEventWhite") &&
+        setIsWhiteCastling(true);
+      (checkValue.message === "blackKing" ||
+        checkValue.message === "isCastlingEventBlack") &&
+        setIsBlackCastling(true);
+      if (
+        checkValue.message === "isCastlingEventWhite" ||
+        checkValue.message === "isCastlingEventBlack"
+      ) {
+        setIsCastlingEvent(true);
+      }
+
       checkValue.message === "checkMate" && setIsCheckMate(true);
     }
   };
+
+  useEffect(() => {
+    dispatch(addMoves(squares));
+    if (squaresSlice.length > 0) {
+      dispatch(increaseCount());
+    }
+  }, [squares]);
+
+  useEffect(() => {
+    if (returnMovesCount >= 0) {
+      setPrevSquare(null);
+      setCurrentSquare(null);
+    }
+    returnMovesCount % 2 == 0 && setPlayerTurn("white");
+    returnMovesCount % 2 !== 0 && setPlayerTurn("black");
+  }, [returnMovesCount]);
 
   /* success move */
   useEffect(() => {
     if (isMoveSuccess && !isPromote) {
       moveSoundFile.play();
-      setSquares((prevArray) => {
-        const prevIndex = squares.indexOf(prevSquare);
-        const currentIndex = squares.indexOf(currentSquare);
-        prevArray[currentIndex].piece = promotePiece
-          ? { ...prevSquare.piece, name: promotePiece }
-          : prevSquare.piece;
-        prevArray[prevIndex].piece = { name: null, color: "" };
-        return prevArray;
-      });
-      setPlayerTurn(playerTurn == "white" ? "black" : "white");
-      setIsMoveSuccess(false);
-      setPrevSquare(null);
-      setCurrentSquare(null);
-      setPromotePiece("");
+
+      setSquares(squaresSlice[returnMovesCount]);
+
+      if (!isCastlingEvent) {
+        setSquares(() => {
+          const prevIndex = squares.indexOf(prevSquare);
+          const currentIndex = squares.indexOf(currentSquare);
+
+          // Create a copy of the previous array
+          const newArray = [...squaresSlice[returnMovesCount]];
+          newArray[currentIndex] = {
+            ...newArray[currentIndex],
+            piece: promotePiece
+              ? { ...prevSquare.piece, name: promotePiece }
+              : prevSquare.piece,
+          };
+
+          newArray[prevIndex] = {
+            ...newArray[prevIndex],
+            piece: { name: null, color: "" },
+          };
+          return newArray;
+        });
+      }
+      closeAll();
     }
   }, [isMoveSuccess, isPromote]);
+
+  /* If castling is happen avoid restoring on squares array */
+  useEffect(() => {
+    if (isCastlingEvent) {
+      closeAll();
+    }
+  }, [isCastlingEvent]);
+
+  /* Close All */
+  const closeAll = () => {
+    setIsCastlingEvent(false);
+    setIsMoveSuccess(false);
+    setPrevSquare(null);
+    setCurrentSquare(null);
+    setPromotePiece("");
+  };
 
   /* Check mate */
   useEffect(() => {
@@ -92,25 +158,26 @@ const Board = () => {
           setPromotePiece={setPromotePiece}
         />
       )}
-      {squares.map((square, i) => (
-        <div
-          key={i}
-          className={`square flexCenter ${square.color} ${
-            square.label == prevSquare?.label && "selected-square-bg"
-          }`}
-          onClick={() => handleSquareClick(square)}
-        >
-          {square.piece?.name &&
-            createElement(pieces[square.piece.name], {
-              color: `${square.piece.color}`,
-              size: 35,
-              style: {
-                transform:
-                  square.piece.color == "black" ? "rotate(180deg)" : "",
-              },
-            })}
-        </div>
-      ))}
+      {squaresSlice[returnMovesCount] &&
+        squaresSlice[returnMovesCount].map((square: any, i: number) => (
+          <div
+            key={i}
+            className={`square flexCenter ${square.color} ${
+              square.label == prevSquare?.label && "selected-square-bg"
+            }`}
+            onClick={() => handleSquareClick(square)}
+          >
+            {square.piece?.name &&
+              createElement(pieces[square.piece.name], {
+                color: `${square.piece.color}`,
+                size: 35,
+                style: {
+                  transform:
+                    square.piece.color == "black" ? "rotate(180deg)" : "",
+                },
+              })}
+          </div>
+        ))}
     </div>
   );
 };
