@@ -17,10 +17,11 @@ const Promote = ({ setIsPromote, playerColor, setPromotePiece }: any) => {
   return (
     <div className="promote-container flexCenter">
       <div className="promote flexCenter">
-        {promoteItems.map((item) => {
+        {promoteItems.map((item, i) => {
           const Piece = item.icon;
           return (
             <Piece
+              key={i}
               onClick={() => handleChoosePromote(item.name)}
               color={playerColor}
             />

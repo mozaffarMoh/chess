@@ -46,7 +46,7 @@ const Board = () => {
       let checkValue: any = checkRules(
         prevSquare,
         square,
-        squares,
+        squaresSlice[returnMovesCount],
         setSquares,
         isWhiteCastling,
         isBlackCastling
