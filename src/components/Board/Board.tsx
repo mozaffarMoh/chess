@@ -97,15 +97,13 @@ const Board = () => {
     if (isMoveSuccess && !isPromote) {
       moveSoundFile.play();
 
-      setSquares(squaresSlice[returnMovesCount]);
-
       if (!isCastlingEvent) {
         setSquares(() => {
-          const prevIndex = squares.indexOf(prevSquare);
-          const currentIndex = squares.indexOf(currentSquare);
-
-          // Create a copy of the previous array
           const newArray = [...squaresSlice[returnMovesCount]];
+
+          const prevIndex = newArray.indexOf(prevSquare);
+          const currentIndex = newArray.indexOf(currentSquare);
+
           newArray[currentIndex] = {
             ...newArray[currentIndex],
             piece: promotePiece
@@ -117,6 +115,7 @@ const Board = () => {
             ...newArray[prevIndex],
             piece: { name: null, color: "" },
           };
+
           return newArray;
         });
       }

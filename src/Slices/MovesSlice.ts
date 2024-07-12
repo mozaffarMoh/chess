@@ -12,8 +12,7 @@ export const ordersSlice = createSlice({
             state.data.push(action.payload);
         },
         startfromThisPoint: (state, action) => {
-
-            if (action.payload > 0) { state.data = state.data.slice(0, action.payload + 1) }
+            state.data = state.data.slice(0, action.payload + 1)
         }
     }
 })
